@@ -730,6 +730,7 @@ export default function Partner() {
           <Grid item xs={8}>
           <Label>Street</Label>
             <TextField 
+            fullWidth
             name="street" 
             disabled
             value={addressStore.street}             
