@@ -17,10 +17,12 @@ export default function AppWidgetSummaryTwo({ title, isActive, total, icon, colo
       }}
       {...other}
     >  
+    {title && isActive &&
     <Row >
             <Col  md={{ span: 8, offset: 1 }}><h5>{title}</h5> </Col>
             
           </Row>
+          }
     {isActive && Array.isArray(isActive) && isActive.map((option) => {
         return (
           <Row key={option.item1}>

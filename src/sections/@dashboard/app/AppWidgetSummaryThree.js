@@ -26,10 +26,12 @@ export default function AppWidgetSummaryThree({ title, isActive, total, icon, co
           </Row>          
         )
       })}
+      {title.name && title.value &&
       <Row >
       <Col   md={{ span: 8, offset: 1 }} ><h4 >{title.name}</h4> </Col>
       <Col  ><h4 >{title.value}</h4></Col>
       </Row>
+      }
     </Card>
     
   );

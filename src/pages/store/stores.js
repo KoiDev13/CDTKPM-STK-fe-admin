@@ -53,8 +53,8 @@ const TABLE_HEAD = [
   { id: 'description', label: 'Description', alignRight: false },  
   { id: 'openTime', label: 'OpenTime', alignRight: false },
   { id: 'closeTime', label: 'CloseTime', alignRight: false },
-  { id: 'isApproved', label: 'IsApproved', alignRight: false },
-  { id: 'isEnable', label: 'IsEnable', alignRight: false },
+  { id: 'isApproved', label: 'Approved', alignRight: false },
+  { id: 'isEnable', label: 'Enable', alignRight: false },
   { id: '' },
 ];
 
@@ -727,7 +727,6 @@ export default function Store() {
           <Grid item xs={6}>
           <Label>Provine</Label>
           <TextField
-                  label="Provine"
                   fullWidth
                   select
                   variant="outlined"

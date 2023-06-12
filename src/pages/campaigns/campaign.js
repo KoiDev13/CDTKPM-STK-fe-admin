@@ -48,6 +48,7 @@ import CampaignService from '../../services/campaign.service';
 import { UserListHead, UserListToolbar } from '../../sections/@dashboard/user';
 // mock
 import AdminService from '../../services/admin.service';
+import storeService from '../../services/store.service';
 import ViewCampaign from './view.campaign';
 import headerService from '../../services/header.service';
 import noti from '../../utils/noti';
@@ -56,6 +57,7 @@ import noti from '../../utils/noti';
 
 const TABLE_HEAD = [
   { id: 'name', label: 'Name', alignRight: false },
+  { id: 'storeName', label: 'Store', alignRight: false }, 
   { id: 'description', label: 'Description', alignRight: false },  
   { id: 'gameId', label: 'Game', alignRight: false },  
   { id: 'isEnable', label: 'Enable', alignRight: false }, 
@@ -127,7 +129,20 @@ export default function Campaign() {
   const [isEnable, setIsEnable] = useState("");
 
   const [campaignId, setCampaignId] = useState("");
+  const [openTime, setOpenTime] = useState("")
 
+  const [closeTime, setCloseTime] = useState("")
+  const [open, setOpen] = useState(false);
+  const [addressStore, setAddressStore] = useState({
+    district:"",
+    province:"",
+    ward:"",
+    street:""
+  })
+  const [store, setStore] = useState({
+    name:"",
+    description:""
+  })
    
   const handleClickEdit = (id) => {
     
@@ -203,6 +218,7 @@ export default function Campaign() {
   const handleClickCancel = () => {    
     setOpenEnable(false)
     setIsEnable("")
+    setOpen(false)
   }
 
   const handleChangeRowsPerPage = (event) => {
@@ -216,8 +232,32 @@ export default function Campaign() {
     setSelected([]);
   };
 
-  const handleClickNew = () => {
-     setIsDetail(true);
+  const handleClickStore = (id) => {
+    storeService.GetStoreById(id).then(
+      response =>{
+        if (response.data && response.data.success) {
+          const temp = response.data.data.store
+          console.log(temp)
+          setOpen(true);
+          setAddressStore({
+            district: temp.address.ward.district.fullName,
+            street: temp.address.street,
+            province: temp.address.ward.province.fullName,
+            ward: temp.address.ward.fullName,
+          })
+          setStore({
+            name:temp.name,
+            description: temp.description
+          })
+          setOpenTime(`${temp.openTime.hour}:${temp.openTime.minute}`)
+          setCloseTime(`${temp.closeTime.hour}:${temp.closeTime.minute}`)
+        }
+        
+      }, error => {
+        setSuccess(!success)
+      }
+    )
+   
   }
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - campaigns.length) : 0;
 
@@ -230,7 +270,9 @@ export default function Campaign() {
     }
     CampaignService.CampaignAll().then(
       response =>{
-        if(response.data  && response.data.success) {          
+        if(response.data  && response.data.success) {   
+          const temp = response.data.data;
+          console.log(temp.listCampaign)
           setCampaigns(response.data.data.listCampaign)          
         }
       }, error => {
@@ -266,9 +308,7 @@ export default function Campaign() {
           <Typography variant="h4" gutterBottom>
           Campaigns
           </Typography>
-          <Button onClick={handleClickNew} variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}>
-            New Campaign
-          </Button>
+          
         </Stack>
 
         <Card>
@@ -288,14 +328,16 @@ export default function Campaign() {
                 />
                 <TableBody>
                   {filteredDatas.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-                    const { id, name, description, startDate, endDate,  gameName, status,   isEnable } = row;
+                    const { id, name, storeName, storeId, description, startDate, endDate,  gameName, status,   isEnable } = row;
                     const selectedUser = selected.indexOf(name) !== -1;
 
                     return (
                       <TableRow hover key={id} tabIndex={-1} role="checkbox" selected={selectedUser}>
                         
-
                         <TableCell align="left">{name}</TableCell>
+                        <TableCell align="left">
+                        <Button className='btn btn-success' onClick={() => handleClickStore(storeId)}>{storeName}</Button>
+                          </TableCell>
 
                         <TableCell align="left">{description}</TableCell>    
 
@@ -366,7 +408,105 @@ export default function Campaign() {
           />
         </Card>
 
-      </Container>  
+      </Container> 
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle> Store</DialogTitle>
+        <DialogContent>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+          <Label>Name</Label>
+            <TextField 
+              name="name" 
+              
+              fullWidth
+              value={store.name} 
+              disabled
+              />
+          </Grid>
+          <Grid item xs={12}>
+          <Label>Description</Label>
+            <TextField 
+              name="description"  
+              value={store.description} 
+              fullWidth
+              disabled
+              
+              />
+          </Grid>
+          <Grid item xs={6}>
+          <Label>Province</Label>
+          <TextField
+                  fullWidth                  
+                  value={addressStore.province}
+                  id="country"       
+                  disabled   
+                  
+                />
+           
+          
+          </Grid>
+          <Grid item xs={6}>
+          <Label>District</Label>
+          <TextField
+                                   
+                  
+                  fullWidth
+                  value={addressStore.district}
+                  id="country" 
+                  disabled
+                  
+                />
+               
+          </Grid>
+          <Grid item xs={4}>
+          <Label>Ward</Label>
+          <TextField
+                  fullWidth                  
+                  variant="outlined"
+                  value={addressStore.ward}
+                  id="country"      
+                  disabled
+                />
+                  
+          </Grid>
+          <Grid item xs={8}>
+          <Label>Street</Label>
+            <TextField 
+            fullWidth
+            name="street" 
+            disabled
+            value={addressStore.street}             
+           
+            />
+          </Grid>
+          <Grid item xs={6}>
+          <Label>Open Time</Label>
+          <TextField 
+            name="openTime" 
+            type="text"
+            fullWidth
+            value={openTime} 
+            disabled
+           
+            />
+          </Grid>
+          <Grid item xs={6}> 
+          <Label>Close Time</Label>
+          <TextField 
+            name="closeTime" 
+            type="text"
+            fullWidth
+            value={closeTime} 
+            disabled            
+            />
+          </Grid>
+        </Grid> 
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClickCancel}>Cancel</Button>
+          
+        </DialogActions>
+      </Dialog> 
       <Dialog open={openEnable} onClose={handleClose}>
         <DialogTitle>Edit Enable</DialogTitle>
         <DialogContent> 

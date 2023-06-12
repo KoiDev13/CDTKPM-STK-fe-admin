@@ -17,6 +17,7 @@ export default function AppWidgetSummaryOne({ title, isActive, total, icon, colo
       }}
       {...other}
     >  
+    {title && isActive &&
     <Row >
             <Col  md={{ span: 8, offset: 1 }}>
               <Row>
@@ -26,6 +27,7 @@ export default function AppWidgetSummaryOne({ title, isActive, total, icon, colo
               </Col>
             
           </Row>
+          }
     {isActive && Array.isArray(isActive) && isActive.map((option) => {
         return (
           <Row key={option.item1}>
