@@ -200,12 +200,12 @@ export default function Game() {
       gameService.DeleteGameById(id).then(
         response => { 
           if (response.data && response.data.success) {
-            alert(noti.DELETE_SUCCESS)
+            alert(response.data.message);
             setSuccess(!success);
           }
           
         }, error => {
-          alert(noti.ERROR)
+          alert(error.response.data.message);
           setSuccess(!success)
         }
       )
@@ -256,7 +256,7 @@ export default function Game() {
     setInstruction("");
     setGameId("");
     setIsEnable("");
-    setIsEnable("")
+    setUrlImage("");
     
   }
 
@@ -273,7 +273,10 @@ export default function Game() {
         }
          
       }, error => {
-        console.log(error)
+        if(error.response && error.response.data && !error.response.data.success ) {
+          alert(error.response.data.message)
+        }  
+        setSuccess(!success)
       }
     ) 
   }
@@ -283,14 +286,15 @@ export default function Game() {
         gameService.PostGame(name, description,instruction, imageUrl).then(
           response =>{
             if(response.data && response.data.success && response.data.data) {
-              alert(noti.CREATE_SUCCESS);
+              alert(response.data.message);
               setOpen(false); 
               clearScreen();
               setSuccess(!success)
             }
-          }, error =>{
-            alert(noti.ERROR)
-    
+          }, error => {
+            if(error.response && error.response.data && !error.response.data.success ) {
+              alert(error.response.data.message)
+            }  
             setSuccess(!success)
           }
         )
@@ -298,13 +302,15 @@ export default function Game() {
         gameService.PutGameById(name, description, instruction, gameId , imageUrl).then(
           response =>{
             if(response.data && response.data.success && response.data.data) {
-              alert(noti.EDIT_SUCCESS);
+              alert(response.data.message);
               setOpen(false); 
               clearScreen();
               setSuccess(!success)
             }
-          }, error =>{
-            alert(noti.ERROR)    
+          }, error => {
+            if(error.response && error.response.data && !error.response.data.success ) {
+              alert(error.response.data.message)
+            }  
             setSuccess(!success)
           }
         )
@@ -343,6 +349,18 @@ export default function Game() {
                 console.log(response.data)
                 localStorage.setItem("token", JSON.stringify(response.data.data));
                 setSuccess(!success)
+              } else {
+                adminService.refreshToken(token).then(
+                  response=>{
+                    if(response.data && response.data.success === true) {
+                      console.log(response.data)
+                      localStorage.setItem("token", JSON.stringify(response.data.data));
+                      setSuccess(!success)
+                    } else {
+                      window.location.assign('/login')
+                    }
+                  }
+                )
               }
             }
           )

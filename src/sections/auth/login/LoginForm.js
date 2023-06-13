@@ -30,13 +30,15 @@ export default function LoginForm() {
         response => {
           console.log(response.data.data)
           if(response.data.success && response.data.data) {
+            alert(response.data.message);
             localStorage.setItem("user", JSON.stringify(response.data.data.account));
             localStorage.setItem("token", JSON.stringify(response.data.data.token)) 
             window.location.assign('/');
           }          
           
         }, error => {
-          alert(noti.WRONG_DATA)
+          alert(error.response.data.message);
+          
         }
       )
     } else {

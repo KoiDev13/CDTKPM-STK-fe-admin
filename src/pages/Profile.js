@@ -2,18 +2,18 @@ import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 
 // @mui
-import {   Stack, TextField, Link, Paper,styled, Grid  } from '@mui/material';
+import {  IconButton, InputAdornment, Stack, TextField, Link, Paper,styled, Grid  } from '@mui/material';
 import Box from '@mui/material/Box';
 
 import {Form, Button, Modal, Container} from 'react-bootstrap'
 import MenuItem from '@mui/material/MenuItem';
-import InputLabel from '@mui/material/InputLabel';
 import { LoadingButton } from '@mui/lab';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
-import DialogContentText from '@mui/material/DialogContentText';
+import Iconify from '../components/iconify';
+
 // components
 import adminService from '../services/admin.service'
 
@@ -42,14 +42,16 @@ export default function Profile() {
   
   const [open, setOpen] =  useState(false)
   const [oldPassword, setOldPassword] = useState("");
+  const [showOldPassword, setShowOldPassword] = useState(false);
   const [newPassword, setNewPassword] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const [provines, setProvines] = useState([]);
   const [provineId, setProvineId] = useState("");
   const [districts, setDistricts] = useState([]);
   const [districtId, setDistrictId] = useState("");
   const [wards, setWards] = useState([]);
   const [confirmPassword, setConfirmPassword] = useState("");
-
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [position, setPosition] = useState("");
 
   const [department, setDepartment] = useState("");
@@ -58,6 +60,9 @@ export default function Profile() {
   
   const handleClickCancel = () => {
     setOpen(false)    
+    setOldPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
   }
 
   const handleChangeName = (event) => {        
@@ -152,13 +157,19 @@ export default function Profile() {
       adminService.PutAdminUpdate(name, gender, dateOfBirth, address, position, department).then(
         response => {
           if(response.data && response.data.success === true) {
-            alert("Update Success");
+            alert(response.data.message);
             setSuccess(!success)
           }
+        } , error => {
+          console.log(error)
+          if(error.response && error.response.data && !error.response.data.success ) {
+            alert(error.response.data.message)
+          }  
+          
         }
       )
     } else {
-      alert("Vui lòng nhập đầy đủ thông tin")
+      alert(noti.MISSING_DATA)
     }
   }
   const handleClickChangePass = () => {
@@ -171,26 +182,33 @@ export default function Profile() {
         if(checkPassword(newPassword) === true && newPassword.length >= 8) {
           adminService.changePassword(oldPassword, newPassword).then(
             response => {
+              console.log(response)
               if(response.data && response.data.success === true) {
-                alert("Đổi mật khẩu thành công")
+                alert(response.data.message)
                 setOpen(false)
                 setOldPassword("");
                 setNewPassword("")
                 setConfirmPassword("")
+              } else {
+                alert(response.data.message)
               }
             }, error => {
-              alert("Mật khẩu cũ không đúng")
+              console.log(error)
+              if(error.response && error.response.data && !error.response.data.success ) {
+                alert(error.response.data.message)
+              }  
+              
             }
           )
         } else {
-          alert("Mật khẩu phải có chữ hoa, thường, số và lớn hơn 8 ký tự")
+          alert(noti.ALERT_PASSWORD)
         }
         
       } else {
-        alert("Mật khẩu mới và xác nhận mật khẩu không giống nhau?")
+        alert(noti.SAMP_PASSWORD)
       }
     } else {
-      alert("Vui lòng nhập thông tin")
+      alert(noti.MISSING_DATA)
     }
   }  
   useEffect (()=>{    
@@ -260,6 +278,19 @@ export default function Profile() {
                   console.log(response.data)
                   localStorage.setItem("token", JSON.stringify(response.data.data));
                   setSuccess(!success)
+                } else {
+                  const token = headerService.refreshToken();
+                  adminService.refreshToken(token).then(
+                    response=>{
+                      if(response.data && response.data.success === true) {
+                        console.log(response.data)
+                        localStorage.setItem("token", JSON.stringify(response.data.data));
+                        setSuccess(!success)
+                      } else {
+                        window.location.assign('/login')
+                      }
+                    }
+                  )
                 }
               }
             )
@@ -427,8 +458,17 @@ export default function Profile() {
           name="password"          
           required
           value={oldPassword}
-          type="password"
-          onChange={(event) => { handleChangeOldPassword(event) }}          
+          type={showOldPassword? 'text' : 'password'}
+          onChange={(event) => { handleChangeOldPassword(event) }}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton onClick={() => setShowOldPassword(!showOldPassword)} edge="end">
+                  <Iconify icon={showOldPassword ? 'eva:eye-fill' : 'eva:eye-off-fill'} />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}           
         />        
     </Grid>
         <Grid item xs={12}>
@@ -440,8 +480,17 @@ export default function Profile() {
           
           required
           value={newPassword}
-          type="password"
-          onChange={(event) => { handleChangeNewPassword(event) }}          
+          type={showNewPassword? 'text' : 'password'}
+          onChange={(event) => { handleChangeNewPassword(event) }}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton onClick={() => setShowNewPassword(!showNewPassword)} edge="end">
+                  <Iconify icon={showNewPassword ? 'eva:eye-fill' : 'eva:eye-off-fill'} />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}          
         />        
     </Grid>
     <Grid item xs={12}>
@@ -451,9 +500,17 @@ export default function Profile() {
           name="ConfirmPassword"
           required
           value={confirmPassword}
-          type='password'
+          type={showConfirmPassword ? 'text' : 'password'}
           onChange={(event) => { handleConfirmPassword(event) }}
-          
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end">
+                  <Iconify icon={showConfirmPassword ? 'eva:eye-fill' : 'eva:eye-off-fill'} />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}  
         />
     </Grid>
         </Grid>

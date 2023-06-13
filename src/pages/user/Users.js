@@ -162,20 +162,21 @@ export default function User() {
       UserService.PutUserById(endUserId, name, gender, dateOfBirth, address).then(
         response => {
           if(response.data && response.data.success === true) {
-            alert(noti.EDIT_SUCCESS);
+            alert(response.data.message);
             setOpenPartner(false);
             clearScreen();
             setSuccess(!success)
           }
         }, error => {
-          alert(noti.ERROR)
+          if(error.response && error.response.data && !error.response.data.success ) {
+            alert(error.response.data.message)
+          }
           setSuccess(!success)
         }
       )
     } else {
       alert(noti.MISSING_DATA)
-    }
-    
+    }    
   }
   
   const handleRequestSort = (event, property) => {
@@ -356,6 +357,18 @@ export default function User() {
                 console.log(response.data)
                 localStorage.setItem("token", JSON.stringify(response.data.data));
                 setSuccess(!success)
+              } else {
+                adminService.refreshToken(token).then(
+                  response=>{
+                    if(response.data && response.data.success === true) {
+                      console.log(response.data)
+                      localStorage.setItem("token", JSON.stringify(response.data.data));
+                      setSuccess(!success)
+                    } else {
+                      window.location.assign('/login')
+                    }
+                  }
+                )
               }
             }
           )
