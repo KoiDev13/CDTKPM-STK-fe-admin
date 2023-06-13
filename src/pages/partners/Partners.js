@@ -406,13 +406,15 @@ export default function Partner() {
         partnerService.PutPartnerById(partnerId,name,gender,dateOfBirth,address,partnerType, company).then(
           response => {
             if(response.data && response.data.success === true) {
-              alert(noti.EDIT_SUCCESS);
+              alert(response.data.message);
               setOpenPartner(false);
               clearScreen();
               setSuccess(!success)
             }
           }, error => {
-            alert(noti.ERROR)
+            if(error.response && error.response.data && !error.response.data.success ) {
+              alert(error.response.data.message)
+            }  
             setSuccess(!success)
           }
         )
@@ -420,13 +422,15 @@ export default function Partner() {
         partnerService.PutPartnerById(partnerId,name,gender,dateOfBirth,address,partnerType).then(
           response => {
             if(response.data && response.data.success === true) {
-              alert(noti.EDIT_SUCCESS);
+              alert(response.data.message);
               setOpenPartner(false);
               clearScreen();
               setSuccess(!success)
             }
           }, error => {
-            alert(noti.ERROR)
+            if(error.response && error.response.data && !error.response.data.success ) {
+              alert(error.response.data.message)
+            }  
             setSuccess(!success)
           }
         )
@@ -451,6 +455,7 @@ export default function Partner() {
       ward: "",
       street: ""
     })
+    
   }
   
 
@@ -507,6 +512,18 @@ export default function Partner() {
                 console.log(response.data)
                 localStorage.setItem("token", JSON.stringify(response.data.data));
                 setSuccess(!success)
+              } else {
+                adminService.refreshToken(token).then(
+                  response=>{
+                    if(response.data && response.data.success === true) {
+                      console.log(response.data)
+                      localStorage.setItem("token", JSON.stringify(response.data.data));
+                      setSuccess(!success)
+                    } else {
+                      window.location.assign('/login')
+                    }
+                  }
+                )
               }
             }
           )          
@@ -589,7 +606,7 @@ export default function Partner() {
                             {gender === 'Female' &&(
                               <Avatar alt={userName} src={avatar.avatarFemaleUrl} />
                             )}
-                            {gender === 'Other' &&(
+                            {gender !== 'Female' && gender !== 'Male' &&(
                               <Avatar alt={userName} src={avatar.avatarOthersUrl} />
                             )}
                             <Typography variant="subtitle2" noWrap>

@@ -140,12 +140,15 @@ export default function ProductItem() {
         productItemService.PutEnableProductItemById(productItemId).then(
           response => {
             if(response.data  && response.data.success === true) {
-              alert(noti.ENABLE_SUCCESS);
+              alert(response.data.message);
               setOpenEnable(false)
               setSuccess(!success)
               setIsEnable("")
             }
           } , error => {
+            if(error.response && error.response.data && !error.response.data.success ) {
+              alert(error.response.data.message)
+            }  
             setSuccess(!success)
           }
         )        
@@ -154,13 +157,16 @@ export default function ProductItem() {
         productItemService.PutDisableProductItemById(productItemId).then(
           response => {
             if(response.data  && response.data.success === true) {
-              alert(noti.DISABLE_SUCCESS);
+              alert(response.data.message);
               setOpenEnable(false)
               setSuccess(!success)
               setIsEnable("")
             }
             
           }, error => {
+            if(error.response && error.response.data && !error.response.data.success ) {
+              alert(error.response.data.message)
+            }  
             setSuccess(!success)
           }
         )        
@@ -258,6 +264,18 @@ export default function ProductItem() {
               if(response.data && response.data.success === true) {                
                 localStorage.setItem("token", JSON.stringify(response.data.data));
                 setSuccess(!success)
+              } else {
+                AdminService.refreshToken(token).then(
+                  response=>{
+                    if(response.data && response.data.success === true) {
+                      console.log(response.data)
+                      localStorage.setItem("token", JSON.stringify(response.data.data));
+                      setSuccess(!success)
+                    } else {
+                      window.location.assign('/login')
+                    }
+                  }
+                )
               }
             }, error => {
               console.log(error)

@@ -271,6 +271,11 @@ export default function Store() {
             
             clearScreen();
           }
+        } , error => {
+          if(error.response && error.response.data && !error.response.data.success ) {
+            alert(error.response.data.message)
+          }  
+          setSuccess(!success)
         }
       )
     } else {
@@ -299,6 +304,7 @@ export default function Store() {
     setCloseTimeText("");
     setIsEnable("");
     setStoreId("");
+    setUrlImage("");
   }
 
   const handleClickEdit = (id ) => {
@@ -405,10 +411,15 @@ export default function Store() {
         storeService.StoreApproveStoreId(storeId).then(
           response => {
             if(response.data && response.status === 200 && response.data.success) {
-              alert(noti.APPROVE_SUCCESS);
+              alert(response.data.message);
               setOpen(false)
               setSuccess(!success)
             }
+          } ,error => {
+            if(error.response && error.response.data && !error.response.data.success ) {
+              alert(error.response.data.message)
+            }  
+            setSuccess(!success)
           }
         )
         
@@ -417,11 +428,16 @@ export default function Store() {
         storeService.StoreRejecteStoreId(storeId).then(
           response => {
             if(response.data && response.status === 200 && response.data.success) {
-              alert(noti.REJECTE_SUCCESS);
+              alert(response.data.message);
               setOpen(false)
               setSuccess(!success)
             }
             
+          } , error => {
+            if(error.response && error.response.data && !error.response.data.success ) {
+              alert(error.response.data.message)
+            }  
+            setSuccess(!success)
           }
         )
         
@@ -439,11 +455,14 @@ export default function Store() {
         storeService.StoreEnableStoreId(storeId).then(
           response => {
             if(response.data && response.status === 200 && response.data.success) {
-              alert(noti.ENABLE_SUCCESS);
+              alert(response.data.message);
               setOpenEnable(false)
               setSuccess(!success)
             }
           } ,error => {
+            if(error.response && error.response.data && !error.response.data.success ) {
+              alert(error.response.data.message)
+            }  
             setSuccess(!success)
           }
         )
@@ -453,12 +472,15 @@ export default function Store() {
         storeService.StoreDisableStoreId(storeId).then(
           response => {
             if(response.data && response.status === 200 && response.data.success) {
-              alert(noti.DISABLE_SUCCESS);
+              alert(response.data.message);
               setOpenEnable(false)
               setSuccess(!success)
             }
             
           }, error => {
+            if(error.response && error.response.data && !error.response.data.success ) {
+              alert(error.response.data.message)
+            }  
             setSuccess(!success)
           }
         )        
@@ -506,6 +528,18 @@ export default function Store() {
                 console.log(response.data)
                 localStorage.setItem("token", JSON.stringify(response.data.data));
                 setSuccess(!success)
+              } else {
+                adminService.refreshToken(token).then(
+                  response=>{
+                    if(response.data && response.data.success === true) {
+                      console.log(response.data)
+                      localStorage.setItem("token", JSON.stringify(response.data.data));
+                      setSuccess(!success)
+                    } else {
+                      window.location.assign('/login')
+                    }
+                  }
+                )
               }
             }
           )

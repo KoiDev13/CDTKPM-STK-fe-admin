@@ -163,12 +163,14 @@ export default function ProductCategory() {
       productcategoryService.DeleteProductCategoryById(id).then(
         response => { 
           if (response.data && response.data.success) {
-            alert(noti.DELETE_SUCCESS)
+            alert(response.data.message);
             setSuccess(!success);
           }
           
         }, error => {
-          alert(noti.ERROR)
+          if(error.response && error.response.data && !error.response.data.success ) {
+            alert(error.response.data.message)
+          }  
           setSuccess(!success)
         }
       )
@@ -208,11 +210,14 @@ export default function ProductCategory() {
         productcategoryService.EnablePutProductCategoryById(productCategoryId).then(
           response => {
             if(response.data  && response.data.success) {
-              alert(noti.ENABLE_SUCCESS);
+              alert(response.data.message);
               setOpenEnable(false)
               setSuccess(!success)
             }
           }, error => {
+            if(error.response && error.response.data && !error.response.data.success ) {
+              alert(error.response.data.message)
+            }  
             setSuccess(!success)
           }
         )
@@ -222,12 +227,15 @@ export default function ProductCategory() {
         productcategoryService.DisablePutProductCategoryById(productCategoryId).then(
           response => {
             if(response.data  && response.data.success) {
-              alert(noti.DISABLE_SUCCESS);
+              alert(response.data.message);
               setOpenEnable(false)
               setSuccess(!success)
             }
             
           }, error => {
+            if(error.response && error.response.data && !error.response.data.success ) {
+              alert(error.response.data.message)
+            }  
             setSuccess(!success)
           }
         )        
@@ -263,7 +271,7 @@ export default function ProductCategory() {
         productcategoryService.PostProductCategory(name, description).then(
           response => { 
             if(response.data && response.data.success) {
-              alert(noti.CREATE_SUCCESS)
+              alert(response.data.message);
               setSuccess(true)
               setOpen(false);  
               clearScreen();
@@ -271,7 +279,9 @@ export default function ProductCategory() {
             }
             
           }, error => {
-            alert(noti.ERROR)
+            if(error.response && error.response.data && !error.response.data.success ) {
+              alert(error.response.data.message)
+            }  
             setSuccess(!success)
           }
         )
@@ -279,14 +289,16 @@ export default function ProductCategory() {
         productcategoryService.PutProductCategoryById(name, description, productCategoryId).then(
           response => { 
             if(response.data && response.data.success) {
-              alert(noti.EDIT_SUCCESS)
+              alert(response.data.message);
               setSuccess(true)
               setOpen(false);  
               clearScreen();  
             }
             
           }, error => {
-            alert(noti.ERROR)
+            if(error.response && error.response.data && !error.response.data.success ) {
+              alert(error.response.data.message)
+            }  
             setSuccess(!success)
           }
         )
@@ -322,6 +334,18 @@ export default function ProductCategory() {
                 console.log(response.data)
                 localStorage.setItem("token", JSON.stringify(response.data.data));
                 setSuccess(!success)
+              } else {
+                adminService.refreshToken(token).then(
+                  response=>{
+                    if(response.data && response.data.success === true) {
+                      console.log(response.data)
+                      localStorage.setItem("token", JSON.stringify(response.data.data));
+                      setSuccess(!success)
+                    } else {
+                      window.location.assign('/login')
+                    }
+                  }
+                )
               }
             }
           )
